@@ -38,7 +38,7 @@ class LoginController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle("Log in", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = UIColor(red: 0.5216, green: 0, blue: 0.749, alpha: 1.0)
+        button.backgroundColor = UIColor(hue: 279/360, saturation: 44/100, brightness: 95/100, alpha: 0.4)
         button.layer.cornerRadius = 5
         button.setHeight(50)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
@@ -87,15 +87,8 @@ class LoginController: UIViewController {
             viewModel.password = sender.text
         }
         
-        print("DEBUG: Form is valid \(viewModel.formIsValid)")
-        
-        if viewModel.formIsValid {
-            loginButton.isEnabled = true
-            loginButton.backgroundColor =  UIColor(red: 0.5216, green: 0, blue: 0.749, alpha: 1.0)
-        } else {
-            loginButton.isEnabled = false
-        }
-        
+        updateForm()
+
     }
     
     
@@ -129,4 +122,15 @@ class LoginController: UIViewController {
         emailTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         passwordlTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
     }
+}
+//MARK: - FormViewModel
+
+extension LoginController: FormViewModel {
+    func updateForm() {
+        loginButton.backgroundColor = viewModel.buttonBackgroundColor
+        loginButton.setTitleColor(viewModel.buttonTitleColor, for: .normal)
+        loginButton.isEnabled = viewModel.formIsValid
+    }
+    
+    
 }

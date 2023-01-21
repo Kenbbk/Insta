@@ -10,23 +10,25 @@ import UIKit
 class RegistrationController: UIViewController {
     
     //MARK: - properties
+    private var viewModel = RegistrationViewModel()
     
     private let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "plus_photo"), for: .normal)
         button.tintColor = .white
+        button.addTarget(self, action: #selector(handleProfilePhotoSelect), for: .touchUpInside)
         return button
     }()
     
     private let emailTextField: UITextField = {
-       let tf = CustomTextField(placeholder: "Email")
+        let tf = CustomTextField(placeholder: "Email")
         tf.keyboardType = .emailAddress
         
         return tf
     }()
     
     private let passwordlTextField: UITextField = {
-       let tf = CustomTextField(placeholder: "Password")
+        let tf = CustomTextField(placeholder: "Password")
         
         
         tf.isSecureTextEntry = true
@@ -41,9 +43,10 @@ class RegistrationController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle("Sign Up", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = UIColor(red: 0.5216, green: 0, blue: 0.749, alpha: 1.0)
+        button.backgroundColor = UIColor(hue: 279/360, saturation: 44/100, brightness: 95/100, alpha: 0.4)
         button.layer.cornerRadius = 5
         button.setHeight(50)
+        button.isEnabled = false
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
         
         return button
@@ -64,12 +67,43 @@ class RegistrationController: UIViewController {
         super.viewDidLoad()
         
         configureUI()
+        configureNotificationObservers()
     }
     
     //MARK: - Actions
     
     @objc func handleShowLogin() {
         navigationController?.popViewController(animated: true)
+    }
+    
+    @objc func textDidChange(sender: UITextField) {
+        
+        switch sender {
+        case emailTextField:
+            viewModel.email = sender.text
+        case passwordlTextField:
+            viewModel.password = sender.text
+        case fullNameTextField:
+            viewModel.fullname = sender.text
+        case userNameTextField:
+            viewModel.username = sender.text
+        default:
+            print("DEBUG: UNKNOWN")
+        }
+        
+        updateForm()
+        
+    }
+    
+    @objc func handleProfilePhotoSelect() {
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        
+//        picker.allowsEditing = true
+        
+        
+        
+        present(picker, animated: true, completion: nil)
     }
     
     //MARK: - Helpers
@@ -92,5 +126,46 @@ class RegistrationController: UIViewController {
         view.addSubview(alreadyHaveAccountButton)
         alreadyHaveAccountButton.centerX(inView: view)
         alreadyHaveAccountButton.anchor(bottom: view.safeAreaLayoutGuide.bottomAnchor)
+    }
+    
+    func configureNotificationObservers() {
+        emailTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        passwordlTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        fullNameTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        userNameTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+    }
+}
+
+extension RegistrationController: FormViewModel {
+    func updateForm() {
+        signUpButton.backgroundColor = viewModel.buttonBackgroundColor
+        signUpButton.setTitleColor(viewModel.buttonTitleColor, for: .normal)
+        signUpButton.isEnabled = viewModel.formIsValid
+    }
+    
+    
+}
+
+//MARK: - UIImagePickerControllerDelegate
+
+extension RegistrationController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        guard let selectedImage = info[.editedImage] as? UIImage else { return }
+        
+        
+        
+        plusPhotoButton.layer.cornerRadius = plusPhotoButton.frame.width / 2
+//        plusPhotoButton.layer.masksToBounds = true
+        plusPhotoButton.clipsToBounds = true
+        plusPhotoButton.layer.borderColor = UIColor.white.cgColor
+        plusPhotoButton.layer.borderWidth = 2
+        plusPhotoButton.setImage(selectedImage.withRenderingMode(.alwaysOriginal), for: .normal)
+        
+        self.dismiss(animated: true)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        print("DEBUG: I am canceled")
+        dismiss(animated: true)
     }
 }
