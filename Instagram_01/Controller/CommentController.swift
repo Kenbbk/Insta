@@ -83,6 +83,7 @@ class CommentController: UICollectionViewController {
     //MARK: - Helpers
     
     func configureCollectionView() {
+        navigationItem.backButtonDisplayMode = .minimal
         navigationItem.title = "Comments"
         
         collectionView.backgroundColor = .white

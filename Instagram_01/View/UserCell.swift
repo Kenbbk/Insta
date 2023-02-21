@@ -36,7 +36,7 @@ class UserCell: UITableViewCell {
        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
         label.text = "Eddie Brock"
-        label.textColor = .lightGray
+        label.textColor = .black.withAlphaComponent(0.7)
         
         return label
     }()

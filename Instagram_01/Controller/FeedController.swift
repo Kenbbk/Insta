@@ -26,6 +26,8 @@ class FeedController: UICollectionViewController {
         configureUI()
         fetchPosts()
         
+
+        
     }
     
     //MARK: - Action
@@ -85,7 +87,7 @@ class FeedController: UICollectionViewController {
     
     func configureUI() {
         collectionView.backgroundColor = .white
-        
+        navigationItem.backButtonDisplayMode = .minimal
         collectionView.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
         if post == nil {

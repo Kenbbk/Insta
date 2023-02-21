@@ -36,7 +36,7 @@ class NoFollowBackCell: UITableViewCell {
        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14)
         label.text = "Eddie Brock"
-        label.textColor = .lightGray
+        label.textColor = .black.withAlphaComponent(0.7)
         
         return label
     }()
@@ -44,7 +44,7 @@ class NoFollowBackCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+        selectionStyle = .none
         addSubview(profileImageView)
         profileImageView.setDimensions(height: 48, width: 48)
         profileImageView.layer.cornerRadius = 48 / 2

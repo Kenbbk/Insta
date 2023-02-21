@@ -71,6 +71,7 @@ class ProfileController: UICollectionViewController {
     //MARK: - Helpers
     
     func configureCollectionView() {
+        navigationItem.backButtonDisplayMode = .minimal
         view.backgroundColor = .white
         navigationItem.title = user.username
         collectionView.backgroundColor = .white

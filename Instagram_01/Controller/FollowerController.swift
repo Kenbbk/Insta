@@ -104,13 +104,17 @@ class FollowerController: UIViewController {
         configureSearchControllerFollower()
         configureSearchControllerFollowing()
         configureTableView()
+        fetchUsers()
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         searchControllerFollower.searchBar.isHidden = false
         searchControllerFollowing.searchBar.isHidden = false
-        fetchUsers()
+        followerTableView.reloadData()
+        followingTableView.reloadData()
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -274,6 +278,7 @@ class FollowerController: UIViewController {
     }
     
     func configureUI() {
+        navigationItem.backButtonDisplayMode = .minimal
         navigationItem.title = user?.username
         view.backgroundColor = .white
         
@@ -380,6 +385,8 @@ extension FollowerController: UITableViewDelegate {
         if tableView == followerTableView {
             if indexPath.section == 0 {
                 
+                let controller = AccountNoFollowBackController(users: FollowersThatIdontFollowBack)
+                navigationController?.pushViewController(controller, animated: true)
             } else {
                 let user = inSearchModeFollower ? filteredFollowers[indexPath.row] : followers[indexPath.row]
                 let controller = ProfileController(user: user)

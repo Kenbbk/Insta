@@ -86,6 +86,8 @@ class MainTabController: UITabBarController {
         nav.navigationBar.tintColor = .black
         nav.navigationBar.isTranslucent = false
         
+        
+        
         return nav
     }
     

@@ -41,7 +41,7 @@ class FollowingCell: UITableViewCell {
        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 15)
         label.text = "Eddie Brock"
-        label.textColor = .lightGray
+        label.textColor = .black.withAlphaComponent(0.7)
         
         return label
     }()

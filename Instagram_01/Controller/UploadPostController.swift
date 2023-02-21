@@ -84,6 +84,7 @@ class UploadePostController: UIViewController {
         }
     }
     func configureUI() {
+        navigationItem.backButtonDisplayMode = .minimal
         view.backgroundColor = .white
         
         navigationItem.title = "Upload Post"

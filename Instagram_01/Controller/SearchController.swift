@@ -40,8 +40,9 @@ class SearchController: UIViewController {
         super.viewDidLoad()
         
         configureUI()
-        fetchUsers()
+        
         configureSearchController()
+        fetchUsers()
         fetchPosts()
         navigationItem.hidesSearchBarWhenScrolling = false
     }
@@ -68,6 +69,7 @@ class SearchController: UIViewController {
     
     func configureUI() {
         view.backgroundColor = .white
+        navigationItem.backButtonDisplayMode = .minimal
         navigationItem.title = "Explore"
         tableView.register(UserCell.self, forCellReuseIdentifier: reuseIdentifier)
         tableView.rowHeight = 64
