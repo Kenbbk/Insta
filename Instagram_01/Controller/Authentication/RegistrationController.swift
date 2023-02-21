@@ -12,6 +12,10 @@ class RegistrationController: UIViewController {
     //MARK: - properties
     private var viewModel = RegistrationViewModel()
     
+    private var profileImage: UIImage?
+    
+    weak var delegate: AuthenticationDelegate?
+    
     private let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "plus_photo"), for: .normal)
@@ -47,6 +51,7 @@ class RegistrationController: UIViewController {
         button.layer.cornerRadius = 5
         button.setHeight(50)
         button.isEnabled = false
+        button.addTarget(self, action: #selector(handleSignUp), for: .touchUpInside)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
         
         return button
@@ -71,6 +76,25 @@ class RegistrationController: UIViewController {
     }
     
     //MARK: - Actions
+    
+    @objc func handleSignUp() {
+        guard let email = emailTextField.text else { return }
+        guard let password = passwordlTextField.text else { return }
+        guard let fullname = fullNameTextField.text else { return }
+        guard let username = userNameTextField.text?.lowercased() else { return }
+        guard let profileImage = self.profileImage else { return }
+        
+        let credentials = AuthCrendentials(email: email, password: password, fullname: fullname, username: username, profileImage: profileImage)
+        
+        AuthService.registerUser(withCredential: credentials) { error in
+            if let error = error {
+                print("DEBUG: Failed to register user \(error.localizedDescription)")
+                return
+            }
+            
+            self.delegate?.authenticationDidComplete()
+        }
+    }
     
     @objc func handleShowLogin() {
         navigationController?.popViewController(animated: true)
@@ -99,7 +123,7 @@ class RegistrationController: UIViewController {
         let picker = UIImagePickerController()
         picker.delegate = self
         
-//        picker.allowsEditing = true
+        picker.allowsEditing = true
         
         
         
@@ -151,7 +175,7 @@ extension RegistrationController: FormViewModel {
 extension RegistrationController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         guard let selectedImage = info[.editedImage] as? UIImage else { return }
-        
+        profileImage = selectedImage
         
         
         plusPhotoButton.layer.cornerRadius = plusPhotoButton.frame.width / 2

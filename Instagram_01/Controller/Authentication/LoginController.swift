@@ -7,12 +7,17 @@
 
 import UIKit
 
+protocol AuthenticationDelegate: class {
+    func authenticationDidComplete()
+}
+
 class LoginController: UIViewController {
     
     //MARK: - properties
     
     private var viewModel = LoginViewModel()
     
+    weak var delegate: AuthenticationDelegate?
     private let iconImage: UIImageView = {
         let iv = UIImageView(image: UIImage(named: "Instagram_logo_white"))
         iv.contentMode = .scaleAspectFill
@@ -20,14 +25,14 @@ class LoginController: UIViewController {
     }()
     
     private let emailTextField: UITextField = {
-       let tf = CustomTextField(placeholder: "Email")
+        let tf = CustomTextField(placeholder: "Email")
         tf.keyboardType = .emailAddress
         
         return tf
     }()
     
     private let passwordlTextField: UITextField = {
-       let tf = CustomTextField(placeholder: "Password")
+        let tf = CustomTextField(placeholder: "Password")
         
         
         tf.isSecureTextEntry = true
@@ -43,13 +48,14 @@ class LoginController: UIViewController {
         button.setHeight(50)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 20)
         button.isEnabled = false
+        button.addTarget(self, action: #selector(handleLogin), for: .touchUpInside)
         return button
     }()
     
     private let forgotAccountButton: UIButton = {
         let button = UIButton(type: .system)
         button.attributedTitle(firstPart: "Forgot your password?", secondPart: "Get help signing in")
-        
+        button.addTarget(self, action: #selector(handleShowResetPassword), for: .touchUpInside)
         return button
         
     }()
@@ -70,12 +76,37 @@ class LoginController: UIViewController {
         configureUI()
         configureNotificationObservers()
         
+        
     }
     
     //MARK: - Actions
     
+    @objc func handleShowResetPassword() {
+        let controller = ReSetPasswordController()
+        controller.delegate = self
+        controller.email = emailTextField.text
+        navigationController?.pushViewController(controller, animated: true)
+    }
+    
+    @objc func handleLogin() {
+        guard let email = emailTextField.text else { return }
+        guard let password = passwordlTextField.text else { return }
+        AuthService.logUserIn(email: email, password: password) { result, error in
+            if let error = error {
+                print("DEBUG: Failed to log user in \(error.localizedDescription)")
+                return
+            }
+            
+            self.dismiss(animated: true)
+            self.delegate?.authenticationDidComplete()
+            
+            
+        }
+    }
+    
     @objc func handleShowSignUp() {
         let controller = RegistrationController()
+        controller.delegate = delegate
         navigationController?.pushViewController(controller, animated: true)
     }
     
@@ -88,9 +119,7 @@ class LoginController: UIViewController {
         }
         
         updateForm()
-
     }
-    
     
     //MARK: - Helpers
     
@@ -118,6 +147,7 @@ class LoginController: UIViewController {
         dontHaveAccountButton.anchor(bottom: view.safeAreaLayoutGuide.bottomAnchor)
     }
     
+    
     func configureNotificationObservers() {
         emailTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         passwordlTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
@@ -130,6 +160,14 @@ extension LoginController: FormViewModel {
         loginButton.backgroundColor = viewModel.buttonBackgroundColor
         loginButton.setTitleColor(viewModel.buttonTitleColor, for: .normal)
         loginButton.isEnabled = viewModel.formIsValid
+    }
+}
+//MARK: - ResetPasswordControllerDelegate
+extension LoginController: ResetPasswordControllerDelegate {
+    func controllerDidSendResetPassword(_ controller: ReSetPasswordController) {
+        navigationController?.popViewController(animated: true)
+        showMessage(withTitle: "Success", message: "We sent a link to reset your password")
+        
     }
     
     
