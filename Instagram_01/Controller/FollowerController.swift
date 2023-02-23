@@ -320,16 +320,48 @@ class FollowerController: UIViewController {
         followingTableView.backgroundColor = .clear
     }
     
-    
-    
     func toggleFollowButtonForRightTableView(user: User) {
-        if let firstIndex = self.followingUsers.firstIndex(where: { $0.uid == user.uid }) {
-            self.followingUsers[firstIndex].isFollowed.toggle()
+        guard let firstIndexForFollowing = self.followingUsers.firstIndex(where: { $0.uid == user.uid }) else { return }
+        self.followingUsers[firstIndexForFollowing].isFollowed.toggle()
+        
+        if let firstIndexForFollower = self.followers.firstIndex(where: { $0.uid == user.uid }) {
+            self.followers[firstIndexForFollower].mustShowInFollowerController = true
+            self.followers[firstIndexForFollower].isFollowed.toggle()
+            
+            if let firstIndexForFollowerFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid}) {
+                self.filteredFollowers[firstIndexForFollowerFilter].mustShowInFollowerController = true
+                self.filteredFollowers[firstIndexForFollowerFilter].mustShowInFollowerController.toggle()
+            }
+            followerTableView.reloadData()
         }
-        if let firstIndexForFilter = self.filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid }) {
-            self.filteredFollowingUsers[firstIndexForFilter].isFollowed.toggle()
+        
+        if let firstIndexForFollowingFilter = self.filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid }) {
+            self.filteredFollowingUsers[firstIndexForFollowingFilter].isFollowed.toggle()
         }
+        
         followingTableView.reloadData()
+        
+    }
+    
+    func toggleFollowButtonForLeftTableView(user: User) {
+        
+        guard let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid }) else { return }
+        followers[firstIndex].isFollowed.toggle()
+        
+        if let firstIndexForFollowing = followingUsers.firstIndex(where: { $0.uid == user.uid}) {
+            followingUsers[firstIndexForFollowing].isFollowed.toggle()
+            if let firstIndexForFollowingFilter = filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid}) {
+                filteredFollowingUsers[firstIndexForFollowingFilter].isFollowed.toggle()
+            }
+            followingTableView.reloadData()
+        }
+        
+        if let firstIndexForFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid }) {
+            self.filteredFollowers[firstIndexForFilter].isFollowed.toggle()
+        }
+        
+        followerTableView.reloadData()
+        
     }
     
     
@@ -547,21 +579,13 @@ extension FollowerController: FollowerCellDelegate {
         }
     }
     
-    func toggleFollowButtonForLeftTableView(user: User) {
-        
-        if let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid }) {
-            self.followers[firstIndex].isFollowed.toggle()
-        }
-        if let firstIndexForFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid }) {
-            self.filteredFollowers[firstIndexForFilter].isFollowed.toggle()
-        }
-        followerTableView.reloadData()
-    }
+    
     
     func removeFollower(user: User) {
         followers.removeAll(where: { $0.uid == user.uid})
         filteredFollowers.removeAll(where: { $0.uid == user.uid })
         followerTableView.reloadData()
+        followingTableView.reloadData()
     }
     
 }

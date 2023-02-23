@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol ResetPasswordControllerDelegate: class {
+protocol ResetPasswordControllerDelegate: AnyObject {
     func controllerDidSendResetPassword(_ controller: ReSetPasswordController)
 }
 

@@ -6,7 +6,7 @@
 //
 
 import UIKit
-protocol FollowingCellDelegate: class {
+protocol FollowingCellDelegate: AnyObject {
     func cell(_ cell: FollowingCell, FollowButtonTapped user: User)
 }
 

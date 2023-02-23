@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol CommentInputAccesoryViewDelegate: class {
+protocol CommentInputAccesoryViewDelegate: AnyObject {
     func inputView(_ inputView: CommentInputAccesoryView, wantsToUploadComment comment: String)
 }
 
@@ -25,7 +25,7 @@ class CommentInputAccesoryView: UIView {
         return tv
     }()
     
-    private let postButton: UIButton = {
+    private lazy var postButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Post", for: .normal)
         button.setTitleColor(.black, for: .normal)

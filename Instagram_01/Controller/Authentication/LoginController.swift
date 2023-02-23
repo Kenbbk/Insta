@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol AuthenticationDelegate: class {
+protocol AuthenticationDelegate: AnyObject {
     func authenticationDidComplete()
 }
 
@@ -39,7 +39,7 @@ class LoginController: UIViewController {
         return tf
     }()
     
-    private let loginButton: UIButton = {
+    private lazy var loginButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Log in", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -52,7 +52,7 @@ class LoginController: UIViewController {
         return button
     }()
     
-    private let forgotAccountButton: UIButton = {
+    private lazy var forgotAccountButton: UIButton = {
         let button = UIButton(type: .system)
         button.attributedTitle(firstPart: "Forgot your password?", secondPart: "Get help signing in")
         button.addTarget(self, action: #selector(handleShowResetPassword), for: .touchUpInside)
@@ -60,7 +60,7 @@ class LoginController: UIViewController {
         
     }()
     
-    private let dontHaveAccountButton: UIButton = {
+    private lazy var dontHaveAccountButton: UIButton = {
         let button = UIButton(type: .system)
         
         button.attributedTitle(firstPart: "Don't have an account?", secondPart: "Sign up")

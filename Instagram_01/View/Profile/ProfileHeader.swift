@@ -8,7 +8,7 @@
 import UIKit
 import SDWebImage
 
-protocol ProfileHeaderDelegate: class {
+protocol ProfileHeaderDelegate: AnyObject {
     func header(_ profileHeader: ProfileHeader, didtapActionButtonFor user: User)
     
     func header(_ profileHeader: ProfileHeader, didTapFollowerLabelFor user: User)

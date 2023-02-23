@@ -16,7 +16,7 @@ class RegistrationController: UIViewController {
     
     weak var delegate: AuthenticationDelegate?
     
-    private let plusPhotoButton: UIButton = {
+    private lazy var plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "plus_photo"), for: .normal)
         button.tintColor = .white
@@ -43,7 +43,7 @@ class RegistrationController: UIViewController {
     
     private let userNameTextField = CustomTextField(placeholder: "Username")
     
-    private let signUpButton: UIButton = {
+    private lazy var signUpButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Sign Up", for: .normal)
         button.setTitleColor(.white, for: .normal)
@@ -57,7 +57,7 @@ class RegistrationController: UIViewController {
         return button
     }()
     
-    private let alreadyHaveAccountButton: UIButton = {
+    private lazy var alreadyHaveAccountButton: UIButton = {
         let button = UIButton(type: .system)
         
         button.attributedTitle(firstPart: "Already have an account?", secondPart: "Sign up")

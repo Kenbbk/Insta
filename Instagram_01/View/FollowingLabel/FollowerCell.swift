@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol FollowerCellDelegate: class {
+protocol FollowerCellDelegate: AnyObject {
     func cell(_ cell: FollowerCell, wantsToUnfollow user: User)
     func cell(_ cell: FollowerCell, followButtonTappedFor user: User)
 }
