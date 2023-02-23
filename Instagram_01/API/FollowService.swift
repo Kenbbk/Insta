@@ -95,6 +95,8 @@ struct FollowService {
                             
                             if intersectionArray.contains(user.uid) {
                                 user.isFollowed = true
+                            } else {
+                                user.mustShowInFollowerController = true // 팔로우 버튼이 꼭 보여야함
                             }
                             users.append(user)
                             

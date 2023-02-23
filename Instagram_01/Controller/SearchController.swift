@@ -22,6 +22,7 @@ class SearchController: UIViewController {
     private let searchController = UISearchController(searchResultsController: nil)
     
     private var inSearchMode: Bool {
+        
         return searchController.isActive && !searchController.searchBar.text!.isEmpty
     }
     
@@ -38,29 +39,43 @@ class SearchController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        //        configureSearchController()
         configureUI()
         
-        configureSearchController()
-        fetchUsers()
         fetchPosts()
-        navigationItem.hidesSearchBarWhenScrolling = false
+        //        fetchUsers()
+        
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        searchController.isActive = false
+        print("disappear")
+    }
     
     //MARK: - API
+    
+    func fetchPosts() {
+        configureSearchController()
+        PostService.fetchPosts { posts in
+            self.posts = posts
+            
+            self.collectionView.reloadData()
+            //            self.configureSearchController()
+            print("fetchpost completed")
+            
+            self.fetchUsers()
+            
+        }
+    }
     
     func fetchUsers() {
         UserService.fetchUsers { users in
             self.users = users
+            
             self.tableView.reloadData()
-        }
-    }
-    
-    func fetchPosts() {
-        PostService.fetchPosts { posts in
-            self.posts = posts
-            self.collectionView.reloadData()
+            print("fetchUser completed")
+            //            self.configureSearchController()
+            
         }
     }
     //MARK: - Actions
@@ -70,14 +85,12 @@ class SearchController: UIViewController {
     func configureUI() {
         view.backgroundColor = .white
         navigationItem.backButtonDisplayMode = .minimal
-        navigationItem.title = "Explore"
         tableView.register(UserCell.self, forCellReuseIdentifier: reuseIdentifier)
         tableView.rowHeight = 64
         
         
         view.addSubview(tableView)
         tableView.fillSuperview()
-//        tableView.anchor(top: view.safeAreaLayoutGuide.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, paddingTop: 44)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.isHidden = true
@@ -95,10 +108,8 @@ class SearchController: UIViewController {
         searchController.searchBar.delegate = self
         navigationItem.searchController = searchController
         definesPresentationContext = false
-        
-        
+        navigationItem.hidesSearchBarWhenScrolling = false
     }
-    
 }
 
 //MARK: - UITableViewDataSource
@@ -123,11 +134,24 @@ extension SearchController: UITableViewDelegate {
         navigationController?.pushViewController(controller, animated: true)
     }
     
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        searchController.isActive = false
+        searchController.searchBar.endEditing(true)
+        print("I am scrolling")
+        
+    }
+    
+    
 }
 //MARK: - UISearchBarDelegate
 extension SearchController: UISearchBarDelegate {
     
 }
+
+extension SearchController: UISearchControllerDelegate {
+    
+}
+
 
 //MARK: - UISearchResultUpdating
 extension SearchController: UISearchResultsUpdating {
@@ -148,6 +172,7 @@ extension SearchController: UICollectionViewDataSource {
         cell.viewModel = PostViewModel(post: posts[indexPath.row])
         return cell
     }
+    
 }
 //MARK: - UICollectionViewDelegate
 extension SearchController: UICollectionViewDelegate {
@@ -161,7 +186,6 @@ extension SearchController: UICollectionViewDelegate {
         searchBar.endEditing(true)
         searchBar.showsCancelButton = false
         searchBar.text = nil
-        
         collectionView.isHidden = false
         tableView.isHidden = true
         

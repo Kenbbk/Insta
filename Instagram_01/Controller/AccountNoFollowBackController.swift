@@ -14,11 +14,13 @@ class AccountNoFollowBackController: UIViewController {
     
     
     //MARK: - Properties
-    
+    private var user: User? // 타고 온 페이지 나중에 수정해야함 어차피 이 컨트롤러는 자기 자신의 페이지가 아니면 보이지 않아야하
     private var users = [User]()
     
-    init(users: [User]) {
-        self.users = users
+
+    
+    init(user: User) {
+        self.user = user
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -36,11 +38,27 @@ class AccountNoFollowBackController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
+        fetchUsers()
+//        let controllers = navigationController?.viewControllers
+//        guard let controllers = controllers else { return }
+//        for item in controllers {
+//            if let yes = item as? FollowerController {
+//                yes.fetchUsers()
+//                print(yes.isFollowerTab)
+//            }
+//        }
     }
     //MARK: - Actions
     
     //MARK: - Helpers
     
+    func fetchUsers() {
+        guard let user = user else { return }
+        FollowService.fetchFollowersAndWheatherFollowed(for: user.uid) { users in
+            self.users = users.filter({ $0.isFollowed == false })
+            self.tableView.reloadData()
+        }
+    }
     func configureUI() {
         title = "Accounts You Don't Follow Back"
         navigationItem.backButtonDisplayMode = .minimal
@@ -112,12 +130,46 @@ class AccountNoFollowBackHeader: UITableViewHeaderFooterView {
 
 extension AccountNoFollowBackController: FollowerCellDelegate {
     func cell(_ cell: FollowerCell, wantsToUnfollow user: User) {
-        print("working")
+        UserService.removeFollow(uid: user.uid) { error in
+            
+            PostService.updateUserFeedAfterRemoving(user: user)
+            self.removeFollower(user: user)
+            print("Successfully removed")
+        }
+        
     }
     
     func cell(_ cell: FollowerCell, followButtonTappedFor user: User) {
-        print("working well")
+        if user.isFollowed == false {
+            UserService.follow(uid: user.uid) { error in
+                
+                PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
+                self.toggleFollowButton(user: user)
+            }
+        } else {
+            
+            UserService.follow(uid: user.uid) { error in
+                
+                PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
+                self.toggleFollowButton(user: user)
+            }
+        }
+        
     }
     
+    func toggleFollowButton(user: User) {
+        
+        if let firstIndex = self.users.firstIndex(where: { $0.uid == user.uid }) {
+            self.users[firstIndex].isFollowed.toggle()
+        }
+        
+        tableView.reloadData()
+    }
+    
+    func removeFollower(user: User) {
+        users.removeAll(where: { $0.uid == user.uid})
+        
+        tableView.reloadData()
+    }
     
 }

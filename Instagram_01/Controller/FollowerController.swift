@@ -105,7 +105,6 @@ class FollowerController: UIViewController {
         configureSearchControllerFollowing()
         configureTableView()
         fetchUsers()
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -122,9 +121,6 @@ class FollowerController: UIViewController {
         searchControllerFollower.searchBar.isHidden = true
         searchControllerFollowing.searchBar.isHidden = true
     }
-    
-    
-    
     
     //MARK: - Actions
     
@@ -310,7 +306,6 @@ class FollowerController: UIViewController {
         followerTableView.sectionFooterHeight = 0
         followerTableView.backgroundColor = .clear
         
-        
         view.addSubview(followingTableView)
         followingTableView.anchor(top: leftDividerView.bottomAnchor,left: view.leftAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, right: view.rightAnchor)
         followingTableView.register(FollowingCell.self, forCellReuseIdentifier: followerIdentifier)
@@ -324,8 +319,23 @@ class FollowerController: UIViewController {
         followingTableView.sectionFooterHeight = 0
         followingTableView.backgroundColor = .clear
     }
+    
+    
+    
+    func toggleFollowButtonForRightTableView(user: User) {
+        if let firstIndex = self.followingUsers.firstIndex(where: { $0.uid == user.uid }) {
+            self.followingUsers[firstIndex].isFollowed.toggle()
+        }
+        if let firstIndexForFilter = self.filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid }) {
+            self.filteredFollowingUsers[firstIndexForFilter].isFollowed.toggle()
+        }
+        followingTableView.reloadData()
+    }
+    
+    
 }
 
+//MARK: - UITableViewDataSource
 extension FollowerController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == followerTableView {
@@ -378,14 +388,14 @@ extension FollowerController: UITableViewDataSource {
         }
     }
 }
-
+//MARK: - UITableViewDelegate
 extension FollowerController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView == followerTableView {
             if indexPath.section == 0 {
-                
-                let controller = AccountNoFollowBackController(users: FollowersThatIdontFollowBack)
+                guard let user = user else { return }
+                let controller = AccountNoFollowBackController(user: user)
                 navigationController?.pushViewController(controller, animated: true)
             } else {
                 let user = inSearchModeFollower ? filteredFollowers[indexPath.row] : followers[indexPath.row]
@@ -400,6 +410,7 @@ extension FollowerController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        
         if tableView == followerTableView {
             if FollowersThatIdontFollowBack.count == 0 {
                 return 0
@@ -410,7 +421,6 @@ extension FollowerController: UITableViewDelegate {
         } else {
             return 0
         }
-        
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -488,58 +498,20 @@ extension FollowerController: UISearchBarDelegate { }
 
 //MARK: - FollowingCellDelegate
 extension FollowerController: FollowingCellDelegate {
+    
     func cell(_ cell: FollowingCell, FollowButtonTapped user: User) {
         
-        if inSearchModeFollowing {
-            if user.isFollowed == false {
-                UserService.follow(uid: user.uid) { error in
-                    
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                    
-                    if let firstIndexForFilter = self.filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid}), let firstIndex = self.followingUsers.firstIndex(where: { $0.uid == user.uid}) {
-                        
-                        self.filteredFollowingUsers[firstIndexForFilter].isFollowed.toggle()
-                        self.followingUsers[firstIndex].isFollowed.toggle()
-                        
-                        self.followingTableView.reloadData() // 팔로우
-                    }
-                }
-            } else {
-                UserService.follow(uid: user.uid) { error in
-                    
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                    
-                    if let firstIndexForFilter = self.filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid}), let firstIndex = self.followingUsers.firstIndex(where: { $0.uid == user.uid}) {
-                        
-                        self.filteredFollowingUsers[firstIndexForFilter].isFollowed.toggle()
-                        self.followingUsers[firstIndex].isFollowed.toggle()
-                        
-                        self.followingTableView.reloadData() // 팔로우
-                    }
-                }
+        if user.isFollowed == false {
+            UserService.follow(uid: user.uid) { error in
+                
+                PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
+                self.toggleFollowButtonForRightTableView(user: user)
             }
         } else {
-            if user.isFollowed == false {
-                UserService.follow(uid: user.uid) { error in
-                    
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                    
-                    if let firstIndex = self.followingUsers.firstIndex(where: { $0.uid == user.uid}) {
-                        
-                        self.followingUsers[firstIndex].isFollowed.toggle()
-                        self.followingTableView.reloadData() // 팔로우
-                    }
-                }
-            } else {
-                UserService.unfollow(uid: user.uid) { error in
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                    
-                    if let firstIndex = self.followingUsers.firstIndex(where: { $0.uid == user.uid}) {
-                        
-                        self.followingUsers[firstIndex].isFollowed.toggle()
-                        self.followingTableView.reloadData() // 언팔로우
-                    }
-                }
+            UserService.unfollow(uid: user.uid) { error in
+                
+                PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
+                self.toggleFollowButtonForRightTableView(user: user)
             }
         }
     }
@@ -547,66 +519,50 @@ extension FollowerController: FollowingCellDelegate {
 
 //MARK: - FollowerCellDelegate
 extension FollowerController: FollowerCellDelegate {
+    
     func cell(_ cell: FollowerCell, wantsToUnfollow user: User) {
         UserService.removeFollow(uid: user.uid) { error in
             
             PostService.updateUserFeedAfterRemoving(user: user)
-            self.fetchUsers()
+            self.removeFollower(user: user)
+            print("Successfully removed")
         }
     }
     
     func cell(_ cell: FollowerCell, followButtonTappedFor user: User) {
-        if inSearchModeFollower {
-            if user.followingStatusToggled == false {
-                UserService.follow(uid: user.uid) { error in
-                    
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                    
-                    if let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid}), let firstIndexForFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid}) {
-                        
-                        self.followers[firstIndex].followingStatusToggled.toggle()
-                        self.filteredFollowers[firstIndexForFilter].followingStatusToggled.toggle()
-                        self.followerTableView.reloadData()
-                    }
-                }
-            } else {
+        
+        if user.isFollowed == false {
+            UserService.follow(uid: user.uid) { error in
                 
-                UserService.follow(uid: user.uid) { error in
-                    
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                    
-                    if let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid}), let firstIndexForFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid}) {
-                        
-                        self.followers[firstIndex].followingStatusToggled.toggle()
-                        self.filteredFollowers[firstIndexForFilter].followingStatusToggled.toggle()
-                        self.followerTableView.reloadData()
-                    }
-                }
-                
+                PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
+                self.toggleFollowButtonForLeftTableView(user: user)
             }
         } else {
-            if user.followingStatusToggled == false {
-                UserService.follow(uid: user.uid) { error in
-                    
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                    
-                    if let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid}) {
-                        self.followers[firstIndex].followingStatusToggled.toggle()
-                        
-                        self.followerTableView.reloadData()
-                    }
-                }
-            } else {
-                UserService.unfollow(uid: user.uid) { error in
-                    PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                    
-                    if let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid}) {
-                        self.followers[firstIndex].followingStatusToggled.toggle()
-                        print("Unfollow")
-                        self.followerTableView.reloadData()
-                    }
-                }
+            
+            UserService.follow(uid: user.uid) { error in
+                
+                PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
+                self.toggleFollowButtonForLeftTableView(user: user)
             }
         }
     }
+    
+    func toggleFollowButtonForLeftTableView(user: User) {
+        
+        if let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid }) {
+            self.followers[firstIndex].isFollowed.toggle()
+        }
+        if let firstIndexForFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid }) {
+            self.filteredFollowers[firstIndexForFilter].isFollowed.toggle()
+        }
+        followerTableView.reloadData()
+    }
+    
+    func removeFollower(user: User) {
+        followers.removeAll(where: { $0.uid == user.uid})
+        filteredFollowers.removeAll(where: { $0.uid == user.uid })
+        followerTableView.reloadData()
+    }
+    
 }
+

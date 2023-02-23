@@ -24,16 +24,21 @@ struct FollowerCellViewModel {
     }
     
     var followButtonshouldHidden: Bool {
-        return user.isFollowed
+        if user.mustShowInFollowerController {
+            return false
+        } else {
+            return user.isFollowed
+        }
+        
     }
     
     var followButtonTitle: NSAttributedString {
-        var trueText = NSMutableAttributedString(string: "·", attributes: [.font: UIFont.systemFont(ofSize: 15, weight: UIFont.Weight(30))])
+        let trueText = NSMutableAttributedString(string: "·", attributes: [.font: UIFont.systemFont(ofSize: 15, weight: UIFont.Weight(30))])
         trueText.append(NSAttributedString(string: " Following", attributes: [.font: UIFont.boldSystemFont(ofSize: 15), .foregroundColor: UIColor.black.withAlphaComponent(0.8)]))
-        var falseText = NSMutableAttributedString(string: "·", attributes: [.font: UIFont.systemFont(ofSize: 15, weight: UIFont.Weight(30))])
+        let falseText = NSMutableAttributedString(string: "·", attributes: [.font: UIFont.systemFont(ofSize: 15, weight: UIFont.Weight(30))])
         falseText.append(NSAttributedString(string: " Follow", attributes: [.font: UIFont.boldSystemFont(ofSize: 15), .foregroundColor: UIColor.systemBlue.withAlphaComponent(0.8)]))
         
-        return user.followingStatusToggled ? trueText : falseText
+        return user.isFollowed ? trueText : falseText
     }
     
     init(user: User) {

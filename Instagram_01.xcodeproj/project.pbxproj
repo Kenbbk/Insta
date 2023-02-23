@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		C1E50B28C38B93FE53F199DD /* Pods_Instagram_01.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51F588E5F3398E348DE2B9A3 /* Pods_Instagram_01.framework */; };
 		D625C76E29A4A7FD00E2E900 /* AccountNoFollowBackController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D625C76D29A4A7FD00E2E900 /* AccountNoFollowBackController.swift */; };
+		D625C77229A6555F00E2E900 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D625C77129A6555F00E2E900 /* Assets.xcassets */; };
 		D6AB591E2979630100FB7E4E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB591D2979630100FB7E4E /* AppDelegate.swift */; };
 		D6AB59202979630100FB7E4E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB591F2979630100FB7E4E /* SceneDelegate.swift */; };
 		D6AB59222979630100FB7E4E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB59212979630100FB7E4E /* ViewController.swift */; };
@@ -20,7 +21,6 @@
 		D6AB593E2979654F00FB7E4E /* ImageSelectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB593D2979654F00FB7E4E /* ImageSelectionController.swift */; };
 		D6AB59402979655E00FB7E4E /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB593F2979655E00FB7E4E /* NotificationController.swift */; };
 		D6AB59422979656C00FB7E4E /* ProfileController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB59412979656C00FB7E4E /* ProfileController.swift */; };
-		D6AB5944297969F600FB7E4E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D6AB5943297969F600FB7E4E /* Assets.xcassets */; };
 		D6AB59462979711C00FB7E4E /* FeedCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB59452979711C00FB7E4E /* FeedCell.swift */; };
 		D6AB5948297971D000FB7E4E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB5947297971D000FB7E4E /* Extensions.swift */; };
 		D6AB594B297A51B000FB7E4E /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6AB594A297A51B000FB7E4E /* LoginController.swift */; };
@@ -68,6 +68,7 @@
 		1CA3C81C5A146D1F3F5F3209 /* Pods-Instagram_01.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Instagram_01.debug.xcconfig"; path = "Target Support Files/Pods-Instagram_01/Pods-Instagram_01.debug.xcconfig"; sourceTree = "<group>"; };
 		51F588E5F3398E348DE2B9A3 /* Pods_Instagram_01.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Instagram_01.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D625C76D29A4A7FD00E2E900 /* AccountNoFollowBackController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountNoFollowBackController.swift; sourceTree = "<group>"; };
+		D625C77129A6555F00E2E900 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D6AB591A2979630100FB7E4E /* Instagram_01.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Instagram_01.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6AB591D2979630100FB7E4E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D6AB591F2979630100FB7E4E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -81,7 +82,6 @@
 		D6AB593D2979654F00FB7E4E /* ImageSelectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSelectionController.swift; sourceTree = "<group>"; };
 		D6AB593F2979655E00FB7E4E /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
 		D6AB59412979656C00FB7E4E /* ProfileController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileController.swift; sourceTree = "<group>"; };
-		D6AB5943297969F600FB7E4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = ../../../../Downloads/Assets.xcassets; sourceTree = "<group>"; };
 		D6AB59452979711C00FB7E4E /* FeedCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCell.swift; sourceTree = "<group>"; };
 		D6AB5947297971D000FB7E4E /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		D6AB594A297A51B000FB7E4E /* LoginController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
@@ -186,7 +186,7 @@
 				D6AB591F2979630100FB7E4E /* SceneDelegate.swift */,
 				D6AB59212979630100FB7E4E /* ViewController.swift */,
 				D6AB59232979630100FB7E4E /* Main.storyboard */,
-				D6AB5943297969F600FB7E4E /* Assets.xcassets */,
+				D625C77129A6555F00E2E900 /* Assets.xcassets */,
 				D6AB59282979630300FB7E4E /* LaunchScreen.storyboard */,
 				D6AB592B2979630300FB7E4E /* Info.plist */,
 				D6AB5952297C371C00FB7E4E /* GoogleService-Info.plist */,
@@ -377,8 +377,8 @@
 			files = (
 				D6AB592A2979630300FB7E4E /* LaunchScreen.storyboard in Resources */,
 				D6AB5953297C371C00FB7E4E /* GoogleService-Info.plist in Resources */,
-				D6AB5944297969F600FB7E4E /* Assets.xcassets in Resources */,
 				D6AB59252979630100FB7E4E /* Main.storyboard in Resources */,
+				D625C77229A6555F00E2E900 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

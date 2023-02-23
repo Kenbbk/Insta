@@ -17,7 +17,7 @@ struct User {
     
     var isFollowed = false
     
-    var followingStatusToggled = false
+    var mustShowInFollowerController = false
     
     var stats: UserStats!
     
