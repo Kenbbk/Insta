@@ -17,7 +17,7 @@ class AccountNoFollowBackController: UIViewController {
     private var user: User? // 타고 온 페이지 나중에 수정해야함 어차피 이 컨트롤러는 자기 자신의 페이지가 아니면 보이지 않아야하
     private var users = [User]()
     
-
+    
     
     init(user: User) {
         self.user = user
@@ -39,18 +39,21 @@ class AccountNoFollowBackController: UIViewController {
         super.viewDidLoad()
         configureUI()
         fetchUsers()
-//        let controllers = navigationController?.viewControllers
-//        guard let controllers = controllers else { return }
+        
+//        guard let controllers = navigationController?.viewControllers else { return }
 //        for item in controllers {
 //            if let yes = item as? FollowerController {
-//                yes.fetchUsers()
-//                print(yes.isFollowerTab)
+//                yes.navigationItem.title?.append("1")
+//
+//                print("I am red")
+////                print(yes.isFollowerTab)
 //            }
 //        }
     }
     //MARK: - Actions
     
     //MARK: - Helpers
+    
     
     func fetchUsers() {
         guard let user = user else { return }
@@ -61,7 +64,7 @@ class AccountNoFollowBackController: UIViewController {
     }
     func configureUI() {
         title = "Accounts You Don't Follow Back"
-        navigationItem.backButtonDisplayMode = .minimal
+        navigationItem.backButtonTitle = ""
         
         view.addSubview(tableView)
         tableView.tableFooterView = UIView(frame: .zero)
@@ -100,6 +103,12 @@ extension AccountNoFollowBackController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 70
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let user = users[indexPath.row]
+        let controller = ProfileController(user: user)
+        navigationController?.pushViewController(controller, animated: true)
     }
 }
 
@@ -154,6 +163,7 @@ extension AccountNoFollowBackController: FollowerCellDelegate {
                 self.toggleFollowButton(user: user)
             }
         }
+        Helper.getController(nav: navigationController, user: user)
         
     }
     

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 private let followerIdentifier = "followerCell"
 private let noFollowBackIdentifier = "noFollowBackCell"
@@ -15,7 +16,7 @@ class FollowerController: UIViewController {
     //MARK: - Properties
     
     var isFollowerTab: Bool?
-    private var user: User? // 지금있는 프로파일 페이지의 주인
+    private var pageOwnerUser: User? // 지금있는 프로파일 페이지의 주인
     private var followers = [User]()
     private var filteredFollowers = [User]()
     private var followingUsers = [User]()
@@ -35,7 +36,7 @@ class FollowerController: UIViewController {
     }
     init(user: User) {
         
-        self.user = user
+        self.pageOwnerUser = user
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -105,6 +106,7 @@ class FollowerController: UIViewController {
         configureSearchControllerFollowing()
         configureTableView()
         fetchUsers()
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -156,8 +158,29 @@ class FollowerController: UIViewController {
     
     //MARK: - Helpers
     
-    func fetchUsers() {
-        guard let user = user else { return }
+    func FollowerUpdate(user: User) {
+        guard pageOwnerUser?.uid == Auth.auth().currentUser?.uid else { return }
+        
+        guard let firstIndex = followers.firstIndex(where: { $0.uid == user.uid }) else { return }
+        followers[firstIndex].isFollowed.toggle()
+        
+        if let firstIndexForFilter = filteredFollowers.firstIndex(where: { $0.uid == user.uid }) {
+            filteredFollowers[firstIndexForFilter].isFollowed.toggle()
+        }
+        followerTableView.reloadData()
+    }
+//    func showNothing() {
+//        let number = followers.count - 1
+//        if number >= 0 {
+//            for i in 0...number {
+//                followers[i].mustShowInFollowerController = true
+//            }
+//        }
+//        followerTableView.reloadData()
+//    }
+    
+    private func fetchUsers() {
+        guard let user = pageOwnerUser else { return }
         
         let group = DispatchGroup()
         group.enter()
@@ -274,8 +297,8 @@ class FollowerController: UIViewController {
     }
     
     func configureUI() {
-        navigationItem.backButtonDisplayMode = .minimal
-        navigationItem.title = user?.username
+        navigationItem.backButtonTitle = ""
+        navigationItem.title = pageOwnerUser?.username
         view.backgroundColor = .white
         
         view.addSubview(followerButton)
@@ -426,7 +449,7 @@ extension FollowerController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView == followerTableView {
             if indexPath.section == 0 {
-                guard let user = user else { return }
+                guard let user = pageOwnerUser else { return }
                 let controller = AccountNoFollowBackController(user: user)
                 navigationController?.pushViewController(controller, animated: true)
             } else {

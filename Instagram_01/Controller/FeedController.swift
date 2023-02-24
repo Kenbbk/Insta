@@ -87,7 +87,7 @@ class FeedController: UICollectionViewController {
     
     func configureUI() {
         collectionView.backgroundColor = .white
-        navigationItem.backButtonDisplayMode = .minimal
+        navigationItem.backButtonTitle = ""
         collectionView.register(FeedCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         
         if post == nil {

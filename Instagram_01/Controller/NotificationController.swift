@@ -57,7 +57,7 @@ class NotificationController: UITableViewController {
     
     //MARK: - Helpers
     func configureTableView() {
-        navigationItem.backButtonDisplayMode = .minimal
+        navigationItem.backButtonTitle = ""
         view.backgroundColor = .white
         navigationItem.title = "Notification"
         

@@ -84,7 +84,7 @@ class SearchController: UIViewController {
     
     func configureUI() {
         view.backgroundColor = .white
-        navigationItem.backButtonDisplayMode = .minimal
+        navigationItem.backButtonTitle = ""
         tableView.register(UserCell.self, forCellReuseIdentifier: reuseIdentifier)
         tableView.rowHeight = 64
         

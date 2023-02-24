@@ -32,16 +32,17 @@ class ProfileController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureCollectionView()
+        
 //        checkIfUserIsFollowed()
 //        fetchUserStats()
-        fetchPosts()
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        configureCollectionView()
         checkIfUserIsFollowed()
         fetchUserStats()
-
+        fetchPosts()
     }
     
     //MARK: - API
@@ -71,7 +72,7 @@ class ProfileController: UICollectionViewController {
     //MARK: - Helpers
     
     func configureCollectionView() {
-        navigationItem.backButtonDisplayMode = .minimal
+        navigationItem.backButtonTitle = ""
         view.backgroundColor = .white
         navigationItem.title = user.username
         collectionView.backgroundColor = .white
