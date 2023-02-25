@@ -18,7 +18,6 @@ class NotificationController: UITableViewController {
             tableView.reloadData()
         }
     }
-    
     private let refresher = UIRefreshControl()
     
     //MARK: - Lifecycle
@@ -56,6 +55,16 @@ class NotificationController: UITableViewController {
     }
     
     //MARK: - Helpers
+    
+    func updateUIFromOtherController(uid: String) {
+        
+        for number in 0..<notifications.count {
+            if notifications[number].uid == uid {
+                notifications[number].userIsFollowed.toggle()
+            }
+        }
+    }
+    
     func configureTableView() {
         navigationItem.backButtonTitle = ""
         view.backgroundColor = .white
@@ -84,6 +93,7 @@ extension NotificationController {
     }
 }
 
+
 //MARK: - UItableViewDelegate
 
 extension NotificationController {
@@ -95,8 +105,6 @@ extension NotificationController {
             self.showLoader(false)
             let controller = ProfileController(user: user)
             self.navigationController?.pushViewController(controller, animated: true)
-            
-            
         }
     }
 }
@@ -108,7 +116,7 @@ extension NotificationController: NotificationCellDelegate {
         showLoader(true)
         UserService.follow(uid: uid) { _ in
             self.showLoader(false)
-            cell.viewModel?.notification.userIsFollowed.toggle()
+            Helper.getControllers(uid: uid)
         }
     }
     
@@ -116,7 +124,7 @@ extension NotificationController: NotificationCellDelegate {
         showLoader(true)
         UserService.unfollow(uid: uid) { _ in
             self.showLoader(false)
-            cell.viewModel?.notification.userIsFollowed.toggle()
+            Helper.getControllers(uid: uid)
         }
     }
     
@@ -129,6 +137,7 @@ extension NotificationController: NotificationCellDelegate {
             self.navigationController?.pushViewController(controller, animated: true)
         }
     }
-    
-    
 }
+
+
+

@@ -16,7 +16,7 @@ class FollowerController: UIViewController {
     //MARK: - Properties
     
     var isFollowerTab: Bool?
-    private var pageOwnerUser: User? // 지금있는 프로파일 페이지의 주인
+    private var pageOwnerUser: User // 지금있는 프로파일 페이지의 주인
     private var followers = [User]()
     private var filteredFollowers = [User]()
     private var followingUsers = [User]()
@@ -50,15 +50,17 @@ class FollowerController: UIViewController {
         print("Followercontroller deinit")
     }
     
-    private let followerTableView: UITableView = {
+    private lazy var followerTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
-        
+        tableView.delegate = self
+        tableView.dataSource = self
         return tableView
     }()
     
-    private let followingTableView: UITableView = {
+    private lazy var followingTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
-        
+        tableView.delegate = self
+        tableView.dataSource = self
         return tableView
     }()
     
@@ -107,14 +109,14 @@ class FollowerController: UIViewController {
         configureTableView()
         fetchUsers()
         
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         searchControllerFollower.searchBar.isHidden = false
         searchControllerFollowing.searchBar.isHidden = false
-        followerTableView.reloadData()
-        followingTableView.reloadData()
+        
         
     }
     
@@ -157,34 +159,49 @@ class FollowerController: UIViewController {
     }
     
     //MARK: - Helpers
-    
-    func FollowerUpdate(user: User) {
-        guard pageOwnerUser?.uid == Auth.auth().currentUser?.uid else { return }
+    func tableViewUpdateAfterFollowOrUnfollow(uid: String) {
+        guard pageOwnerUser.uid == Auth.auth().currentUser?.uid else { return }
         
-        guard let firstIndex = followers.firstIndex(where: { $0.uid == user.uid }) else { return }
-        followers[firstIndex].isFollowed.toggle()
-        
-        if let firstIndexForFilter = filteredFollowers.firstIndex(where: { $0.uid == user.uid }) {
-            filteredFollowers[firstIndexForFilter].isFollowed.toggle()
+        if let firstIndexForFollower = followers.firstIndex(where: { $0.uid == uid }) {
+            followers[firstIndexForFollower].isFollowed.toggle()
+            followers[firstIndexForFollower].mustShowInFollowerController = true
+            
+            if let firstIndexForFilteredFollower = filteredFollowers.firstIndex(where: { $0.uid == uid}) {
+                filteredFollowers[firstIndexForFilteredFollower].isFollowed.toggle()
+                filteredFollowers[firstIndexForFilteredFollower].mustShowInFollowerController = true
+            }
+            followerTableView.reloadData()
         }
         followerTableView.reloadData()
+        
+        guard let firstIndexForFollowing = followingUsers.firstIndex(where: {$0.uid == uid }) else { return }
+        followingUsers[firstIndexForFollowing].isFollowed.toggle()
+        
+        if let firstIndexForFilteredFollowing = filteredFollowingUsers.firstIndex(where: { $0.uid == uid }) {
+            filteredFollowingUsers[firstIndexForFilteredFollowing].isFollowed.toggle()
+        }
+        followingTableView.reloadData()
     }
-//    func showNothing() {
-//        let number = followers.count - 1
-//        if number >= 0 {
-//            for i in 0...number {
-//                followers[i].mustShowInFollowerController = true
-//            }
+    
+//    func FollowerUpdate(uid: String) {
+//        guard pageOwnerUser.uid == Auth.auth().currentUser?.uid else { return }
+//
+//        guard let firstIndex = followers.firstIndex(where: { $0.uid == uid }) else { return }
+//        followers[firstIndex].isFollowed.toggle()
+//
+//        if let firstIndexForFilter = filteredFollowers.firstIndex(where: { $0.uid == uid }) {
+//            filteredFollowers[firstIndexForFilter].isFollowed.toggle()
 //        }
 //        followerTableView.reloadData()
 //    }
+
     
     private func fetchUsers() {
-        guard let user = pageOwnerUser else { return }
+        
         
         let group = DispatchGroup()
         group.enter()
-        FollowService.fetchFollowersAndWheatherFollowed(for: user.uid) { users in
+        FollowService.fetchFollowersAndWheatherFollowed(for: pageOwnerUser.uid) { users in
             
             self.followers = users.sorted(by: { $0.username < $1.username})
             
@@ -200,7 +217,7 @@ class FollowerController: UIViewController {
         }
         
         group.enter()
-        FollowService.fetchFollowing(for: user.uid) { users in
+        FollowService.fetchFollowing(for: pageOwnerUser.uid) { users in
             
             self.followingUsers = users.sorted(by: { $0.username < $1.username})
             group.leave()
@@ -291,14 +308,13 @@ class FollowerController: UIViewController {
         searchControllerFollowing.searchBar.delegate = self
         searchControllerFollowing.searchBar.backgroundImage = UIImage()
         searchControllerFollowing.automaticallyShowsCancelButton = false
-        
         followingTableView.tableHeaderView = searchControllerFollowing.searchBar
         self.definesPresentationContext = false
     }
     
     func configureUI() {
         navigationItem.backButtonTitle = ""
-        navigationItem.title = pageOwnerUser?.username
+        navigationItem.title = pageOwnerUser.username
         view.backgroundColor = .white
         
         view.addSubview(followerButton)
@@ -320,8 +336,7 @@ class FollowerController: UIViewController {
         followerTableView.anchor(top: leftDividerView.bottomAnchor,left: view.leftAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, right: view.rightAnchor)
         followerTableView.register(FollowerCell.self, forCellReuseIdentifier: followerIdentifier)
         followerTableView.register(NoFollowBackCell.self, forCellReuseIdentifier: noFollowBackIdentifier)
-        followerTableView.delegate = self
-        followerTableView.dataSource = self
+        
         followerTableView.rowHeight = 64
         followerTableView.register(CustomHeader.self, forHeaderFooterViewReuseIdentifier: headerIdentifier)
         followerTableView.separatorStyle = .none
@@ -333,8 +348,7 @@ class FollowerController: UIViewController {
         followingTableView.anchor(top: leftDividerView.bottomAnchor,left: view.leftAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, right: view.rightAnchor)
         followingTableView.register(FollowingCell.self, forCellReuseIdentifier: followerIdentifier)
         followingTableView.register(NoFollowBackCell.self, forCellReuseIdentifier: noFollowBackIdentifier)
-        followingTableView.delegate = self
-        followingTableView.dataSource = self
+        
         followingTableView.rowHeight = 64
         followingTableView.register(CustomHeader.self, forHeaderFooterViewReuseIdentifier: headerIdentifier)
         followingTableView.separatorStyle = .none
@@ -342,53 +356,7 @@ class FollowerController: UIViewController {
         followingTableView.sectionFooterHeight = 0
         followingTableView.backgroundColor = .clear
     }
-    
-    func toggleFollowButtonForRightTableView(user: User) {
-        guard let firstIndexForFollowing = self.followingUsers.firstIndex(where: { $0.uid == user.uid }) else { return }
-        self.followingUsers[firstIndexForFollowing].isFollowed.toggle()
-        
-        if let firstIndexForFollower = self.followers.firstIndex(where: { $0.uid == user.uid }) {
-            self.followers[firstIndexForFollower].mustShowInFollowerController = true
-            self.followers[firstIndexForFollower].isFollowed.toggle()
-            
-            if let firstIndexForFollowerFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid}) {
-                self.filteredFollowers[firstIndexForFollowerFilter].mustShowInFollowerController = true
-                self.filteredFollowers[firstIndexForFollowerFilter].mustShowInFollowerController.toggle()
-            }
-            followerTableView.reloadData()
-        }
-        
-        if let firstIndexForFollowingFilter = self.filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid }) {
-            self.filteredFollowingUsers[firstIndexForFollowingFilter].isFollowed.toggle()
-        }
-        
-        followingTableView.reloadData()
-        
     }
-    
-    func toggleFollowButtonForLeftTableView(user: User) {
-        
-        guard let firstIndex = self.followers.firstIndex(where: { $0.uid == user.uid }) else { return }
-        followers[firstIndex].isFollowed.toggle()
-        
-        if let firstIndexForFollowing = followingUsers.firstIndex(where: { $0.uid == user.uid}) {
-            followingUsers[firstIndexForFollowing].isFollowed.toggle()
-            if let firstIndexForFollowingFilter = filteredFollowingUsers.firstIndex(where: { $0.uid == user.uid}) {
-                filteredFollowingUsers[firstIndexForFollowingFilter].isFollowed.toggle()
-            }
-            followingTableView.reloadData()
-        }
-        
-        if let firstIndexForFilter = self.filteredFollowers.firstIndex(where: { $0.uid == user.uid }) {
-            self.filteredFollowers[firstIndexForFilter].isFollowed.toggle()
-        }
-        
-        followerTableView.reloadData()
-        
-    }
-    
-    
-}
 
 //MARK: - UITableViewDataSource
 extension FollowerController: UITableViewDataSource {
@@ -449,8 +417,8 @@ extension FollowerController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView == followerTableView {
             if indexPath.section == 0 {
-                guard let user = pageOwnerUser else { return }
-                let controller = AccountNoFollowBackController(user: user)
+                
+                let controller = AccountNoFollowBackController(user: pageOwnerUser)
                 navigationController?.pushViewController(controller, animated: true)
             } else {
                 let user = inSearchModeFollower ? filteredFollowers[indexPath.row] : followers[indexPath.row]
@@ -491,10 +459,11 @@ extension FollowerController: UITableViewDelegate {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        searchControllerFollower.isActive = false
+//        searchControllerFollower.isActive = false
         searchControllerFollower.searchBar.endEditing(true)
         
-        searchControllerFollowing.isActive = false
+        
+//        searchControllerFollowing.isActive = false
         searchControllerFollowing.searchBar.endEditing(true)
     }
 }
@@ -560,15 +529,16 @@ extension FollowerController: FollowingCellDelegate {
             UserService.follow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                self.toggleFollowButtonForRightTableView(user: user)
+                Helper.getControllers(uid: user.uid)
             }
         } else {
             UserService.unfollow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                self.toggleFollowButtonForRightTableView(user: user)
+                Helper.getControllers(uid: user.uid)
             }
         }
+        
     }
 }
 
@@ -590,19 +560,17 @@ extension FollowerController: FollowerCellDelegate {
             UserService.follow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                self.toggleFollowButtonForLeftTableView(user: user)
+                Helper.getControllers(uid: user.uid)
             }
         } else {
             
-            UserService.follow(uid: user.uid) { error in
+            UserService.unfollow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                self.toggleFollowButtonForLeftTableView(user: user)
+                Helper.getControllers(uid: user.uid)
             }
         }
     }
-    
-    
     
     func removeFollower(user: User) {
         followers.removeAll(where: { $0.uid == user.uid})

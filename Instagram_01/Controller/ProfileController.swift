@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 private let cellIdentifier = "ProfileCell"
 
@@ -15,13 +16,13 @@ class ProfileController: UICollectionViewController {
     
     //MARK: - Properties
     
-    private var user: User
+    private var ownerUser: User
     private var posts = [Post]()
     
     //MARK: - Lifecycle
     
     init(user: User) {
-        self.user = user
+        self.ownerUser = user
         super.init(collectionViewLayout: UICollectionViewFlowLayout())
     }
     
@@ -31,38 +32,34 @@ class ProfileController: UICollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-//        checkIfUserIsFollowed()
-//        fetchUserStats()
-        
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
         configureCollectionView()
         checkIfUserIsFollowed()
-        fetchUserStats()
         fetchPosts()
+        }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        fetchUserStats()
+        print("View appeared")
     }
     
     //MARK: - API
     
     func checkIfUserIsFollowed() {
-        UserService.checkIfUserIsFollowed(uid: user.uid) { isFollowed in
-            self.user.isFollowed = isFollowed
+        UserService.checkIfUserIsFollowed(uid: ownerUser.uid) { isFollowed in
+            self.ownerUser.isFollowed = isFollowed
             self.collectionView.reloadData()
         }
     }
     
     func fetchUserStats() {
-        UserService.fetchUserStats(uid: user.uid) { stats in
-            self.user.stats = stats
+        UserService.fetchUserStats(uid: ownerUser.uid) { stats in
+            self.ownerUser.stats = stats
             self.collectionView.reloadData()
         }
     }
     
     func fetchPosts() {
-        PostService.fetchPosts(forUser: user.uid) { posts in
+        PostService.fetchPosts(forUser: ownerUser.uid) { posts in
             self.posts = posts
             self.collectionView.reloadData()
             
@@ -70,16 +67,25 @@ class ProfileController: UICollectionViewController {
     }
     
     //MARK: - Helpers
+    func toggleFollowButton(uid: String) {
+        guard ownerUser.uid != Auth.auth().currentUser?.uid else { return }
+        guard ownerUser.uid == uid else { return }
+        
+        ownerUser.isFollowed.toggle()
+        fetchUserStats()
+    }
     
     func configureCollectionView() {
         navigationItem.backButtonTitle = ""
         view.backgroundColor = .white
-        navigationItem.title = user.username
+        navigationItem.title = ownerUser.username
         collectionView.backgroundColor = .white
         collectionView.register(ProfileCell.self, forCellWithReuseIdentifier: cellIdentifier)
         collectionView.register(ProfileHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
         collectionView.alwaysBounceVertical = true
     }
+    
+    
 }
 
 //MARK: - UICollectionViewDataSource
@@ -104,7 +110,7 @@ extension ProfileController {
         header.backgroundColor = .white
         header.delegate = self
         
-        header.viewModel = ProfileHeaderViewModel(user: user)
+        header.viewModel = ProfileHeaderViewModel(user: ownerUser)
         
         return header
     }
@@ -167,25 +173,28 @@ extension ProfileController: ProfileHeaderDelegate {
         } else if user.isFollowed {
             
             UserService.unfollow(uid: user.uid) { error in
-                self.user.isFollowed = false
+                
                 self.fetchUserStats()
-
+                Helper.getControllers(uid: user.uid)
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
                 
             }
         } else {
             UserService.follow(uid: user.uid) { error in
-                self.user.isFollowed = true
+                
                 self.fetchUserStats()
-
+                Helper.getControllers(uid: user.uid)
                 
                 NotificationService.uploadNotification(toUid: user.uid, fromUser: currentUser, type: .follow)
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
                 
             }
         }
+        
+        
+        }
     }
     
     
-}
+

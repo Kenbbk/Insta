@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 private let headerIdentifier = "header"
 private let followerIdentifier = "followerCell"
@@ -14,13 +15,18 @@ class AccountNoFollowBackController: UIViewController {
     
     
     //MARK: - Properties
-    private var user: User? // 타고 온 페이지 나중에 수정해야함 어차피 이 컨트롤러는 자기 자신의 페이지가 아니면 보이지 않아야하
-    private var users = [User]()
+    private var ownerUser: User // 타고 온 페이지 나중에 수정해야함 어차피 이 컨트롤러는 자기 자신의 페이지가 아니면 보이지 않아야하
+    private var users = [User]() {
+        didSet {
+//            tableView.reloadData()
+            print("Tableview Set")
+        }
+    }
     
     
     
     init(user: User) {
-        self.user = user
+        self.ownerUser = user
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -28,9 +34,10 @@ class AccountNoFollowBackController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
-        
+        tableView.delegate = self
+        tableView.dataSource = self
         return tableView
     }()
     //MARK: - Lifecycle
@@ -40,15 +47,15 @@ class AccountNoFollowBackController: UIViewController {
         configureUI()
         fetchUsers()
         
-//        guard let controllers = navigationController?.viewControllers else { return }
-//        for item in controllers {
-//            if let yes = item as? FollowerController {
-//                yes.navigationItem.title?.append("1")
-//
-//                print("I am red")
-////                print(yes.isFollowerTab)
-//            }
-//        }
+        //        guard let controllers = navigationController?.viewControllers else { return }
+        //        for item in controllers {
+        //            if let yes = item as? FollowerController {
+        //                yes.navigationItem.title?.append("1")
+        //
+        //                print("I am red")
+        ////                print(yes.isFollowerTab)
+        //            }
+        //        }
     }
     //MARK: - Actions
     
@@ -56,10 +63,12 @@ class AccountNoFollowBackController: UIViewController {
     
     
     func fetchUsers() {
-        guard let user = user else { return }
-        FollowService.fetchFollowersAndWheatherFollowed(for: user.uid) { users in
+        
+        FollowService.fetchFollowersAndWheatherFollowed(for: ownerUser.uid) { users in
+            
             self.users = users.filter({ $0.isFollowed == false })
             self.tableView.reloadData()
+            
         }
     }
     func configureUI() {
@@ -70,8 +79,6 @@ class AccountNoFollowBackController: UIViewController {
         tableView.tableFooterView = UIView(frame: .zero)
         tableView.sectionFooterHeight = 0
         tableView.rowHeight = 64
-        tableView.delegate = self
-        tableView.dataSource = self
         tableView.fillSuperview()
         tableView.backgroundColor = .white
         tableView.register(AccountNoFollowBackHeader.self, forHeaderFooterViewReuseIdentifier: headerIdentifier)
@@ -82,19 +89,20 @@ class AccountNoFollowBackController: UIViewController {
 
 extension AccountNoFollowBackController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        print(users.count)
         return users.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: followerIdentifier, for: indexPath) as! FollowerCell
         let user = users[indexPath.row]
+        
         cell.delegate = self
         cell.viewModel = FollowerCellViewModel(user: user)
         return cell
     }
-    
-    
-}
+    }
+
 extension AccountNoFollowBackController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: headerIdentifier) as! AccountNoFollowBackHeader
@@ -153,28 +161,38 @@ extension AccountNoFollowBackController: FollowerCellDelegate {
             UserService.follow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                self.toggleFollowButton(user: user)
+                Helper.getControllers(uid: user.uid)
             }
         } else {
             
-            UserService.follow(uid: user.uid) { error in
+            UserService.unfollow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                self.toggleFollowButton(user: user)
+                Helper.getControllers(uid: user.uid)
             }
         }
-        Helper.getController(nav: navigationController, user: user)
         
+    }
+//
+//    func toggleFollowButton(user: User) {
+//
+//        if let firstIndex = self.users.firstIndex(where: { $0.uid == user.uid }) {
+//            self.users[firstIndex].isFollowed.toggle()
+//        }
+//
+//        //        tableView.reloadData()
+//    }
+    
+    func toggleFollowButton(uid: String) {
+        guard ownerUser.uid == Auth.auth().currentUser?.uid else { return }
+        
+        guard let firstIndex = users.firstIndex(where: { $0.uid == uid }) else { return }
+        
+        users[firstIndex].isFollowed.toggle()
+        tableView.reloadData()
+        print("It is toggled")
     }
     
-    func toggleFollowButton(user: User) {
-        
-        if let firstIndex = self.users.firstIndex(where: { $0.uid == user.uid }) {
-            self.users[firstIndex].isFollowed.toggle()
-        }
-        
-        tableView.reloadData()
-    }
     
     func removeFollower(user: User) {
         users.removeAll(where: { $0.uid == user.uid})

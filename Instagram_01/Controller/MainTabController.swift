@@ -12,6 +12,7 @@ import YPImagePicker
 
 class MainTabController: UITabBarController {
     
+    static var allNavigationControllers = [UINavigationController]()
     
     var user: User? {
         didSet {
@@ -76,7 +77,9 @@ class MainTabController: UITabBarController {
         
         self.viewControllers = [feed, search, imageSelector, notifications, profile]
         
+        MainTabController.allNavigationControllers = [feed, search, notifications, profile]
         tabBar.tintColor = .black
+        
     }
     
     func templateNavigationController(unselectedImage: UIImage, selectedImage: UIImage, rootViewController: UIViewController) -> UINavigationController {

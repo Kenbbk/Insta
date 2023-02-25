@@ -88,7 +88,6 @@ class SearchController: UIViewController {
         tableView.register(UserCell.self, forCellReuseIdentifier: reuseIdentifier)
         tableView.rowHeight = 64
         
-        
         view.addSubview(tableView)
         tableView.fillSuperview()
         tableView.delegate = self
@@ -100,7 +99,7 @@ class SearchController: UIViewController {
         collectionView.alwaysBounceVertical = true
     }
     func configureSearchController() {
-        
+        searchController.searchBar.autocapitalizationType = .none
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.hidesNavigationBarDuringPresentation = false
@@ -135,8 +134,9 @@ extension SearchController: UITableViewDelegate {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        searchController.isActive = false
+//        searchController.isActive = false
         searchController.searchBar.endEditing(true)
+        
         print("I am scrolling")
         
     }
@@ -151,7 +151,6 @@ extension SearchController: UISearchBarDelegate {
 extension SearchController: UISearchControllerDelegate {
     
 }
-
 
 //MARK: - UISearchResultUpdating
 extension SearchController: UISearchResultsUpdating {
@@ -196,7 +195,6 @@ extension SearchController: UICollectionViewDelegate {
         navigationController?.pushViewController(controller, animated: true)
     }
 }
-
 
 extension SearchController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
