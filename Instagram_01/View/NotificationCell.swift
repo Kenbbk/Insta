@@ -37,7 +37,7 @@ class NotificationCell: UITableViewCell {
         return iv
     }()
     
-    private let infoLabel: UILabel = {
+    private lazy var infoLabel: UILabel = {
        let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 14)
         label.text = "venom"

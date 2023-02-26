@@ -15,7 +15,7 @@ private let headerIdentifier = "header"
 class FollowerController: UIViewController {
     //MARK: - Properties
     
-    var isFollowerTab: Bool?
+    var isFollowerTab: Bool!
     private var pageOwnerUser: User // 지금있는 프로파일 페이지의 주인
     private var followers = [User]()
     private var filteredFollowers = [User]()
@@ -109,13 +109,24 @@ class FollowerController: UIViewController {
         configureTableView()
         fetchUsers()
         
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         searchControllerFollower.searchBar.isHidden = false
         searchControllerFollowing.searchBar.isHidden = false
+        //        print("FFFFFF \(searchTextForFollower)")
+        if searchTextForFollower != "" {
+            print("searchtextforfollower /\(searchTextForFollower)")
+            searchControllerFollower.searchBar.text = searchTextForFollower
+            searchControllerFollower.isActive = true
+        }
+        if searchTextForFollowing != "" {
+            print("SearchTextForFollowing \(searchTextForFollowing)")
+            searchControllerFollowing.searchBar.text = searchTextForFollowing
+            searchControllerFollowing.isActive = true
+        }
+        
         
         
     }
@@ -124,6 +135,17 @@ class FollowerController: UIViewController {
         super.viewWillDisappear(animated)
         searchControllerFollower.searchBar.isHidden = true
         searchControllerFollowing.searchBar.isHidden = true
+        
+        
+        if isFollowerTab {
+            searchTextForFollower = searchControllerFollower.searchBar.text!
+        } else {
+            searchTextForFollowing = searchControllerFollowing.searchBar.text!
+        }
+        print("searchtextforfollower /\(searchTextForFollower)")
+        print("SearchTextForFollowing \(searchTextForFollowing)")
+        searchControllerFollower.isActive = false
+        searchControllerFollowing.isActive = false
     }
     
     //MARK: - Actions
@@ -182,19 +204,6 @@ class FollowerController: UIViewController {
         }
         followingTableView.reloadData()
     }
-    
-//    func FollowerUpdate(uid: String) {
-//        guard pageOwnerUser.uid == Auth.auth().currentUser?.uid else { return }
-//
-//        guard let firstIndex = followers.firstIndex(where: { $0.uid == uid }) else { return }
-//        followers[firstIndex].isFollowed.toggle()
-//
-//        if let firstIndexForFilter = filteredFollowers.firstIndex(where: { $0.uid == uid }) {
-//            filteredFollowers[firstIndexForFilter].isFollowed.toggle()
-//        }
-//        followerTableView.reloadData()
-//    }
-
     
     private func fetchUsers() {
         
@@ -356,7 +365,7 @@ class FollowerController: UIViewController {
         followingTableView.sectionFooterHeight = 0
         followingTableView.backgroundColor = .clear
     }
-    }
+}
 
 //MARK: - UITableViewDataSource
 extension FollowerController: UITableViewDataSource {
@@ -382,7 +391,7 @@ extension FollowerController: UITableViewDataSource {
         if tableView == followerTableView {
             if indexPath.section == 0 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: noFollowBackIdentifier, for: indexPath) as! NoFollowBackCell
-                guard let pickedFollower = pickedFollower else { fatalError()}
+                guard let pickedFollower = pickedFollower else { fatalError() }
                 cell.viewModel = NoFollowBackViewModel(user: pickedFollower, number: FollowersThatIdontFollowBack.count)
                 return cell
                 
@@ -424,6 +433,7 @@ extension FollowerController: UITableViewDelegate {
                 let user = inSearchModeFollower ? filteredFollowers[indexPath.row] : followers[indexPath.row]
                 let controller = ProfileController(user: user)
                 navigationController?.pushViewController(controller, animated: true)
+                print("Push to Next \(searchTextForFollower)")
             }
         } else {
             let user = inSearchModeFollowing ? filteredFollowingUsers[indexPath.row] : followingUsers[indexPath.row]
@@ -459,11 +469,11 @@ extension FollowerController: UITableViewDelegate {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//        searchControllerFollower.isActive = false
+        //        searchControllerFollower.isActive = false
         searchControllerFollower.searchBar.endEditing(true)
         
         
-//        searchControllerFollowing.isActive = false
+        //        searchControllerFollowing.isActive = false
         searchControllerFollowing.searchBar.endEditing(true)
     }
 }
@@ -503,23 +513,28 @@ extension FollowerController: UISearchResultsUpdating {
         if searchController == searchControllerFollower {
             guard let searchText = searchController.searchBar.text?.lowercased() else { return }
             filteredFollowers = followers.filter( { $0.username.contains(searchText) || $0.fullname.lowercased().contains(searchText)} )
-            print("DEBUG: Filtered users a \(filteredFollowers)")
+//            print("DEBUG: Filtered users a \(filteredFollowers)")
             followerTableView.reloadData()
-            print("followerTableView reloadedData")
+//            print("followerTableView reloadedData")
         }
         if searchController == searchControllerFollowing {
             guard let searchText = searchController.searchBar.text?.lowercased() else { return }
             filteredFollowingUsers = followingUsers.filter( { $0.username.contains(searchText) || $0.fullname.lowercased().contains(searchText)} )
-            print("DEBUG: Filtered users b \(filteredFollowingUsers)")
-            print("followingTableView reloadedData")
+//            print("DEBUG: Filtered users b \(filteredFollowingUsers)")
+//            print("followingTableView reloadedData")
             followingTableView.reloadData()
         }
     }
 }
 
 //MARK: - UISearchBarDelegate
-extension FollowerController: UISearchBarDelegate { }
+extension FollowerController: UISearchBarDelegate {
+    
+}
 
+extension FollowerController: UISearchControllerDelegate {
+   
+}
 //MARK: - FollowingCellDelegate
 extension FollowerController: FollowingCellDelegate {
     
@@ -529,13 +544,13 @@ extension FollowerController: FollowingCellDelegate {
             UserService.follow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
             }
         } else {
             UserService.unfollow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
             }
         }
         
@@ -560,14 +575,14 @@ extension FollowerController: FollowerCellDelegate {
             UserService.follow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
             }
         } else {
             
             UserService.unfollow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
             }
         }
     }

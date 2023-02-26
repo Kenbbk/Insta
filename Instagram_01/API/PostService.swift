@@ -141,6 +141,24 @@ struct PostService {
         }
     }
     
+    static func updateUserFeedAfterForFollowing(uid: String, didFollow: Bool) {
+        guard let currentUserUid = Auth.auth().currentUser?.uid else { return }
+        let query = COLLECTION_POSTS.whereField("ownerUid", isEqualTo: uid)
+        query.getDocuments { snapshot, error in
+            guard let documents = snapshot?.documents else { return }
+            
+            let docIDs = documents.map( { $0.documentID })
+            
+            docIDs.forEach { id in
+                if didFollow {
+                    COLLECTION_USERS.document(currentUserUid).collection("user-feed").document(id).setData([:])
+                } else {
+                    COLLECTION_USERS.document(currentUserUid).collection("user-feed").document(id).delete()
+                }
+            }
+        }
+    }
+    
     private static func updateUserFeedAfterPost(postid: String) {
         guard let currentUserUid = Auth.auth().currentUser?.uid else { return }
         

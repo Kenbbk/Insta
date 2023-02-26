@@ -35,7 +35,7 @@ class ProfileController: UICollectionViewController {
         configureCollectionView()
         checkIfUserIsFollowed()
         fetchPosts()
-        }
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         fetchUserStats()
@@ -84,8 +84,6 @@ class ProfileController: UICollectionViewController {
         collectionView.register(ProfileHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: headerIdentifier)
         collectionView.alwaysBounceVertical = true
     }
-    
-    
 }
 
 //MARK: - UICollectionViewDataSource
@@ -103,7 +101,6 @@ extension ProfileController {
     }
     
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        
         
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: headerIdentifier, for: indexPath) as! ProfileHeader
         
@@ -158,8 +155,6 @@ extension ProfileController: ProfileHeaderDelegate {
         let controller = FollowerController(user: user)
         controller.isFollowerTab = true
         navigationController?.pushViewController(controller, animated: true)
-        
-        
     }
     
     func header(_ profileHeader: ProfileHeader, didtapActionButtonFor user: User) {
@@ -175,26 +170,22 @@ extension ProfileController: ProfileHeaderDelegate {
             UserService.unfollow(uid: user.uid) { error in
                 
                 self.fetchUserStats()
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                
             }
         } else {
             UserService.follow(uid: user.uid) { error in
                 
                 self.fetchUserStats()
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
                 
                 NotificationService.uploadNotification(toUid: user.uid, fromUser: currentUser, type: .follow)
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                
             }
         }
-        
-        
-        }
     }
-    
-    
+}
+
+
 

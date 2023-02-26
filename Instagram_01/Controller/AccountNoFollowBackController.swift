@@ -161,14 +161,14 @@ extension AccountNoFollowBackController: FollowerCellDelegate {
             UserService.follow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: true)
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
             }
         } else {
             
             UserService.unfollow(uid: user.uid) { error in
                 
                 PostService.updateUserFeedAfterForFollowing(user: user, didFollow: false)
-                Helper.getControllers(uid: user.uid)
+                Helper.syncFollowerWithOtherViews(uid: user.uid)
             }
         }
         

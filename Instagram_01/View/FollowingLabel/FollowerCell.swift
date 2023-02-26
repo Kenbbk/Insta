@@ -31,14 +31,14 @@ class FollowerCell: UITableViewCell {
     }()
     
     private let usernameLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 15)
         label.text = "venom"
         return label
     }()
     
     private let fullnameLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 15)
         label.text = "Eddie Brock"
         label.textColor = .black.withAlphaComponent(0.7)
@@ -124,10 +124,6 @@ class FollowerCell: UITableViewCell {
         usernameLabel.text = viewModel.username
         followButton.isHidden = viewModel.followButtonshouldHidden
         followButton.setAttributedTitle(viewModel.followButtonTitle, for: .normal)
-        
-        
-//        followButton.setTitle(viewModel.followButtonTitle, for: .normal)
-        
     }
 }
 

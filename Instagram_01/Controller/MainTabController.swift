@@ -24,11 +24,8 @@ class MainTabController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         checkIfUserIsLoggedin()
         fetchUser()
-        
-        
     }
     
     //MARK: - API
@@ -38,7 +35,7 @@ class MainTabController: UITabBarController {
         UserService.fetchUser(withUid: uid) { user in
             self.user = user
         }
-       
+        
     }
     
     func checkIfUserIsLoggedin() {
@@ -53,8 +50,6 @@ class MainTabController: UITabBarController {
             }
         }
     }
-    
-    
     
     //MARK: - Helpers
     
@@ -89,8 +84,6 @@ class MainTabController: UITabBarController {
         nav.navigationBar.tintColor = .black
         nav.navigationBar.isTranslucent = false
         
-        
-        
         return nav
     }
     
@@ -106,7 +99,6 @@ class MainTabController: UITabBarController {
                 let nav = UINavigationController(rootViewController: controller)
                 nav.modalPresentationStyle = .fullScreen
                 self.present(nav, animated: true)
-                
             }
         }
     }
@@ -118,6 +110,7 @@ extension MainTabController: AuthenticationDelegate {
         self.dismiss(animated: true)
     }
 }
+
 //MARK: - UITabBarControllerDelegate
 
 extension MainTabController: UITabBarControllerDelegate {

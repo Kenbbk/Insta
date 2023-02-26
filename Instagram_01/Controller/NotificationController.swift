@@ -116,7 +116,9 @@ extension NotificationController: NotificationCellDelegate {
         showLoader(true)
         UserService.follow(uid: uid) { _ in
             self.showLoader(false)
-            Helper.getControllers(uid: uid)
+            PostService.updateUserFeedAfterForFollowing(uid: uid, didFollow: true)
+            Helper.syncFollowerWithOtherViews(uid: uid)
+            
         }
     }
     
@@ -124,7 +126,8 @@ extension NotificationController: NotificationCellDelegate {
         showLoader(true)
         UserService.unfollow(uid: uid) { _ in
             self.showLoader(false)
-            Helper.getControllers(uid: uid)
+            PostService.updateUserFeedAfterForFollowing(uid: uid, didFollow: false)
+            Helper.syncFollowerWithOtherViews(uid: uid)
         }
     }
     

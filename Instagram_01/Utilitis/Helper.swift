@@ -9,7 +9,7 @@ import UIKit
 
 struct Helper {
     
-    static func getController(nav: UINavigationController?, uid: String) {
+    static private func sync(nav: UINavigationController?, uid: String) {
         guard let controllers = nav?.viewControllers else { return }
         for controller in controllers {
             if let controller = controller as? FollowerController {
@@ -25,10 +25,10 @@ struct Helper {
         }
     }
     
-    static func getControllers(uid: String) {
+    static func syncFollowerWithOtherViews(uid: String) {
         let navigations = MainTabController.allNavigationControllers
         navigations.forEach { navigation in
-            getController(nav: navigation, uid: uid)
+            sync(nav: navigation, uid: uid)
         }
     }
 }
